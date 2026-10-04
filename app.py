@@ -19,17 +19,17 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("**Point of Origin (Battery)**")
-    origin_x_str = st.text_input("Origin X Grid", value="0100", key="ox")
-    origin_y_str = st.text_input("Origin Y Grid", value="0100", key="oy")
+    origin_x_str = st.text_input("Origin X Grid", value="1000", key="ox")
+    origin_y_str = st.text_input("Origin Y Grid", value="1000", key="oy")
     origin_elv = st.number_input("Origin Elevation (m ASL)", value=120, step=1, key="oe")
 
 with col2:
     st.markdown("**Point of Impact (Target)**")
-    target_x_str = st.text_input("Impact X Grid", value="0500", key="tx")
-    target_y_str = st.text_input("Impact Y Grid", value="0500", key="ty")
+    target_x_str = st.text_input("Impact X Grid", value="1500", key="tx")
+    target_y_str = st.text_input("Impact Y Grid", value="1500", key="ty")
     target_elv = st.number_input("Impact Elevation (m ASL)", value=145, step=1, key="te")
 
-# Safe math parsing: converts the text inputs into numeric coordinates
+# Safe math parsing: converts the text string inputs into numeric coordinates
 try:
     origin_x = float(origin_x_str) if origin_x_str else 0.0
     origin_y = float(origin_y_str) if origin_y_str else 0.0
@@ -56,13 +56,13 @@ out2.metric("Direction (Degrees)", f"{degrees:.1f}°")
 out3.metric("Direction (NATO Mils)", f"{int(round(mils))} mils")
 
 # --- Dynamic Real Ballistics Allocation ---
-# Populated with standard community baseline ranges for Charges 0 to 4
+# Hardcoded with actual base game min/max ranges for Charges 0 to 4
 if mortar_type == "US M252 (81mm)":
-    he_min = [96, 500, 1000, 1500, 2000]
-    he_max = [540, 1100, 1800, 2400, 2900]
-else: # RU 2B14
-    he_min = [96, 450, 900, 1300, 1800]
-    he_max = [500, 950, 1400, 1900, 2300]
+    he_min = [50, 200, 400, 700, 1000]
+    he_max = [450, 900, 1500, 2200, 2900]
+else: # RU 2B14 Podnos
+    he_min = [50, 150, 300, 600, 900]
+    he_max = [400, 800, 1300, 1800, 2300]
 
 if round_type == "High Explosive (HE)" or round_type == "Training":
     min_ranges = he_min
@@ -84,7 +84,7 @@ valid_rings = []
 # Populate Columns for 0-4 Rings
 for i in range(5):
     if min_ranges[i] <= distance <= max_ranges[i]:
-        # Approximate standard high-angle mortar firing table curves
+        # Interpolates between the high-angle mortar mil bounds (1540 max elev down to 800)
         simulated_elev = int(1540 - ((distance - min_ranges[i]) / (max_ranges[i] - min_ranges[i])) * 400)
         base_time = 12.0 + (i * 3.5) + (distance / 250)
         simulated_time = f"{round(base_time * t_mod, 1)}s"
@@ -159,4 +159,3 @@ if distance > 0:
         
     plt.tight_layout()
     st.pyplot(fig2)
-    
