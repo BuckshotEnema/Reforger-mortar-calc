@@ -42,6 +42,48 @@ out1.metric("Distance", f"{distance:.1f} m")
 out2.metric("Direction (NATO Mils)", f"{int(round(mils))} mils")
 import streamlit as st
 import math
+
+st.set_page_config(page_title="Tactical Mortar FDC", layout="centered")
+st.title("Arma Reforger Mortar FDC")
+
+st.subheader("Coordinates")
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("**Point of Origin (Battery)**")
+    origin_x_str = st.text_input("Origin X Grid", value="1000", key="ox")
+    origin_y_str = st.text_input("Origin Y Grid", value="1000", key="oy")
+
+with col2:
+    st.markdown("**Point of Impact (Target)**")
+    target_x_str = st.text_input("Impact X Grid", value="1500", key="tx")
+    target_y_str = st.text_input("Impact Y Grid", value="1500", key="ty")
+
+# Safe math parsing to keep leading zeros intact
+try:
+    origin_x = float(origin_x_str) if origin_x_str else 0.0
+    origin_y = float(origin_y_str) if origin_y_str else 0.0
+    target_x = float(target_x_str) if target_x_str else 0.0
+    target_y = float(target_y_str) if target_y_str else 0.0
+except ValueError:
+    st.error("Please enter numbers only into the grid fields.")
+    origin_x, origin_y, target_x, target_y = 0.0, 0.0, 0.0, 0.0
+
+# --- Mathematical Basic Formulas ---
+dx = target_x - origin_x
+dy = target_y - origin_y
+
+distance = math.sqrt(dx**2 + dy**2)
+angle_rad = math.atan2(dx, dy)
+degrees = math.degrees(angle_rad) % 360.0
+mils = (degrees * 6400.0) / 360.0
+
+st.subheader("Firing Solutions")
+out1, out2 = st.columns(2)
+out1.metric("Distance", f"{distance:.1f} m")
+out2.metric("Direction (NATO Mils)", f"{int(round(mils))} mils")
+import streamlit as st
+import math
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
